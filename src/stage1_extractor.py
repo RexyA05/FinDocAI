@@ -6,12 +6,17 @@ from pypdf import PdfReader
 HEADERS={
     "User-Agent": "FinDocAI project ritamvision@gmail.com"
 }
+
+#Downloads a financial PDF document from SEC EDGAR into memory as raw bytes.
 def download_sec_pdf(pdf_url: str)-> bytes:
     print(f"Downloading PDF from {pdf_url}")
     response=requests.get(pdf_url,headers=HEADERS, timeout=30)
     response.raise_for_status()
     print("Download Successful!")
     return response.content
+
+
+#Parses PDF bytes page by page using pypdf and extracts clean text string.
 def extract_text_from_pdf_bytes(pdf_bytes: bytes)->str:
     pdf_file=io.BytesIO(pdf_bytes)
     reader=PdfReader(pdf_file)
@@ -26,11 +31,21 @@ def extract_text_from_pdf_bytes(pdf_bytes: bytes)->str:
     print(f"Text extraction complete! Total characters extracted: {len(full_document_text)}")
     return full_document_text
 
+
+#Saving raw PDF bytes to a local file so we dont have to re-download every test run
+def save_pdf_to_disk(pdf_bytes: bytes,filepath:str)->None:
+    with open(filepath, "wb") as f:
+        f.write(pdf_bytes)
+    print(f"Saved PDF to {filepath}")
+
+
+
 if __name__=="__main__":
     sample_pdf_url="https://www.sec.gov/files/form10-k.pdf"
     try:
         raw_pdf_bytes=download_sec_pdf(sample_pdf_url)
         extracted_text=extract_text_from_pdf_bytes(raw_pdf_bytes)
+        #Displaying a quick preview of the extracted documents
         print("\n---Document Preview (First 500 characters) --")
         print(extracted_text[:500])
         print("-------------------------------")
