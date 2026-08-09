@@ -1,0 +1,12 @@
+requests
+pypdf
+sentence-transformers
+psycopg2-binary
+pgvector
+google-genai
+fastapi
+uvicorn
+langgraph
+langchain-core
+ragas
+python-dotenv
