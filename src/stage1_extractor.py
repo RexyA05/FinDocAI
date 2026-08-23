@@ -1,12 +1,14 @@
 import io
+import hashlib
 import requests
+from pathlib import Path
 from pypdf import PdfReader
 
 
 HEADERS={
     "User-Agent": "FinDocAI project ritamvision@gmail.com"
 }
-
+DATA_DIR=Path("data")
 #Downloads a financial PDF document from SEC EDGAR into memory as raw bytes.
 def download_sec_pdf(pdf_url: str)-> bytes:
     print(f"Downloading PDF from {pdf_url}")
@@ -23,7 +25,7 @@ def extract_text_from_pdf_bytes(pdf_bytes: bytes)->str:
     extracted_pages=[]
     total_pages=len(reader.pages)
     print(f"Processing {total_pages} pages...")
-    for index,page in enumerate(reader.pages):
+    for page in enumerate(reader.pages):
         text=page.extract_text()
         if text:
             extracted_pages.append(text)
@@ -31,20 +33,29 @@ def extract_text_from_pdf_bytes(pdf_bytes: bytes)->str:
     print(f"Text extraction complete! Total characters extracted: {len(full_document_text)}")
     return full_document_text
 
-
-#Saving raw PDF bytes to a local file so we dont have to re-download every test run
-def save_pdf_to_disk(pdf_bytes: bytes,filepath:str)->None:
-    with open(filepath, "wb") as f:
-        f.write(pdf_bytes)
-    print(f"Saved PDF to {filepath}")
-
-
+#Fetches and extracts text from a PDF URL with deterministic hash caching: Automatically derives cache filename from MD5 hash of the URL if not provided. Prevents stale cache collisions when switching between different SEC filings.
+def get_extracted_text(
+        pdf_url: str="https://www.sec.gov/files/form10-k.pdf",
+        cache_path: Path | None = None,
+        force_download: bool = False)->str:
+        DATA_DIR.mkdir(parents=True,exist_ok=True)
+        if cache_path is None:
+            url_hash=hashlib.md5(pdf_url.encode("utf-8")).hexdigest()[:10]
+            cache_path=DATA_DIR / f"extracted_{url_hash}.txt"
+        if not force_download and cache_path.exists():
+            print(f"[Cache hit] Loading text from cache: {cache_path}")
+            return cache_path.read_text(encoding="utf-8")
+        print(f"[Cache Miss] Downloading and extracting: {pdf_url}")
+        raw_pdf_bytes=download_sec_pdf(pdf_url)
+        text=extract_text_from_pdf_bytes(raw_pdf_bytes)
+        cache_path.write_text(text, encoding="utf-8")
+        print(f"Saved extracted text to cache: {cache_path}")
+        return text
 
 if __name__=="__main__":
     sample_pdf_url="https://www.sec.gov/files/form10-k.pdf"
     try:
-        raw_pdf_bytes=download_sec_pdf(sample_pdf_url)
-        extracted_text=extract_text_from_pdf_bytes(raw_pdf_bytes)
+        extracted_text=get_extracted_text(sample_pdf_url)
         #Displaying a quick preview of the extracted documents
         print("\n---Document Preview (First 500 characters) --")
         print(extracted_text[:500])
