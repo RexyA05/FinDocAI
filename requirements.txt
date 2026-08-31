@@ -1,12 +1,17 @@
-requests
-pypdf
-sentence-transformers
-psycopg2-binary
-pgvector
-google-genai
-fastapi
-uvicorn
-langgraph
-langchain-core
-ragas
-python-dotenv
+# Stage 1: Document Extraction & Parsing
+requests>=2.31.0
+pypdf>=4.0.0
+
+# Stage 2 & 3: Embeddings & Vector Database
+sentence-transformers>=2.6.0
+psycopg2-binary>=2.9.9
+pgvector>=0.2.5
+python-dotenv>=1.0.0
+
+# Stage 4 & 5: LLM & Grounding (Gemini)
+google-genai>=0.1.0
+
+# Stage 6: API Layer (Upcoming)
+fastapi>=0.110.0
+uvicorn>=0.28.0
+pydantic>=2.6.0
