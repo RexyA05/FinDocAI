@@ -16,7 +16,7 @@ def chunk_text_by_words(text:str,chunk_size: int = 500,overlap: int =50)->list[d
     while start_idx < len(words):
         end_idx=min(start_idx+chunk_size,len(words))
         chunk_words=words[start_idx:end_idx]
-        chunk_str="".join(chunk_words)
+        chunk_str=" ".join(chunk_words)
         chunks.append({
             "chunk_id": chunk_id,
             "text":chunk_str,
