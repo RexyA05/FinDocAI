@@ -3,6 +3,7 @@ import hashlib
 import requests
 from pathlib import Path
 from pypdf import PdfReader
+import pdfplumber
 
 
 HEADERS={
@@ -10,6 +11,10 @@ HEADERS={
 }
 DATA_DIR=Path("data")
 #Downloads a financial PDF document from SEC EDGAR into memory as raw bytes.
+def get_document_id(pdf_url: str)->str:
+    return hashlib.md5(pdf_url.encode("utf-8")).hexdigest()[:10]
+
+
 def download_sec_pdf(pdf_url: str)-> bytes:
     print(f"Downloading PDF from {pdf_url}")
     response=requests.get(pdf_url,headers=HEADERS, timeout=30)
@@ -19,17 +24,17 @@ def download_sec_pdf(pdf_url: str)-> bytes:
 
 
 #Parses PDF bytes page by page using pypdf and extracts clean text string.
-def extract_text_from_pdf_bytes(pdf_bytes: bytes)->str:
-    pdf_file=io.BytesIO(pdf_bytes)
-    reader=PdfReader(pdf_file)
-    extracted_pages=[]
-    total_pages=len(reader.pages)
-    print(f"Processing {total_pages} pages...")
-    for page in enumerate(reader.pages):
-        text=page.extract_text()
-        if text:
-            extracted_pages.append(text)
-    full_document_text ="\n\n".join(extracted_pages)
+def extract_text_from_pdf_bytes(pdf_bytes: bytes) -> str:
+    pdf_file = io.BytesIO(pdf_bytes)
+    extracted_pages = []
+    with pdfplumber.open(pdf_file) as pdf:
+        total_pages = len(pdf.pages)
+        print(f"Processing {total_pages} pages...")
+        for page in pdf.pages:
+            text = page.extract_text()
+            if text:
+                extracted_pages.append(text)
+    full_document_text = "\n\n".join(extracted_pages)
     print(f"Text extraction complete! Total characters extracted: {len(full_document_text)}")
     return full_document_text
 
@@ -40,8 +45,8 @@ def get_extracted_text(
         force_download: bool = False)->str:
         DATA_DIR.mkdir(parents=True,exist_ok=True)
         if cache_path is None:
-            url_hash=hashlib.md5(pdf_url.encode("utf-8")).hexdigest()[:10]
-            cache_path=DATA_DIR / f"extracted_{url_hash}.txt"
+            doc_id=get_document_id(pdf_url)
+            cache_path=DATA_DIR / f"extracted_{doc_id}.txt"
         if not force_download and cache_path.exists():
             print(f"[Cache hit] Loading text from cache: {cache_path}")
             return cache_path.read_text(encoding="utf-8")
