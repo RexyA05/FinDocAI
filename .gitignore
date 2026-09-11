@@ -48,3 +48,5 @@ desktop.ini
 .idea/
 *.swp
 *.swo
+# Ignore local data downloads
+data/
