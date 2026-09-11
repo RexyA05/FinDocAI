@@ -1,5 +1,50 @@
+# Environment variables and API secrets
 .env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Python virtual environments
 venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-compiled / optimized files
 __pycache__/
-*.pyc
-data/
+*.py[cod]
+*$py.class
+
+# Local test & benchmark output artifacts
+reports/
+*.log
+
+# Streamlit local configurations and secrets
+.streamlit/secrets.toml
+
+# Model weights, embeddings cache, and token caches
+.cache/
+hf_cache/
+*.bin
+*.pt
+*.safetensors
+*.onnx
+
+# Database and persistent storage
+postgres_data/
+*.sqlite3
+*.db
+
+# Operating System specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor configurations
+.vscode/
+.idea/
+*.swp
+*.swo
