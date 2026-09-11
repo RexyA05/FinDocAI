@@ -184,27 +184,25 @@ def root():
         "health_url": "/health",
     }
 
-
 @app.get("/health", response_model=HealthResponse, tags=["Monitoring"])
-def health_check(conn: Annotated[PgConnection, Depends(get_db)]):
-    ...
-
-@app.get("/health", response_model=HealthResponse, tags=["Monitoring"])
-def health_check(conn: Annotated[PgConnection, Depends(get_db)]):
-    """Health check endpoint verifying database connectivity and Gemini readiness."""
+def health_check():
+    """Lightweight health check verifying DB connectivity and Gemini client status."""
     db_status = "healthy"
     try:
+        conn = get_db_connection()
         with conn.cursor() as cur:
             cur.execute("SELECT 1;")
+        conn.close()
     except Exception as db_err:
         print(f"[Health Check DB Error] {db_err}", file=sys.stderr)
         db_status = "unhealthy"
 
-    return HealthResponse(
-        status="ok" if db_status == "healthy" else "degraded",
-        database=db_status,
-        gemini_client_configured=app_state.get("gemini_client") is not None,
-    )
+    return {
+        "status": "ok" if db_status == "healthy" else "degraded",
+        "database": db_status,
+        "gemini_client_configured": app_state.get("gemini_client") is not None,
+    }
+
 
 
 @app.post("/documents/ingest", response_model=IngestResponse, tags=["Pipeline"])
