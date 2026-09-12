@@ -32,6 +32,7 @@ FinDocAI is a Retrieval-Augmented Generation (RAG) and multi-agent system for au
 - [Known Limitations](#-known-limitations)
 - [Getting Started](#-getting-started)
 - [Usage Guide](#-usage-guide)
+- [Screenshots](#️-screenshots)
 - [Technical Design Decisions](#-technical-design-decisions)
 - [Roadmap](#-roadmap)
 
@@ -51,6 +52,13 @@ FinDocAI is a Retrieval-Augmented Generation (RAG) and multi-agent system for au
 ---
 
 ## 🏗️ Architectural Overview
+
+<div align="center">
+  <img src="Architecture.png" alt="FinDocAI LangGraph architecture: a user query enters the Router Agent, which routes off-topic queries directly to the interface layer and financial/regulatory queries through Dense Vector Retrieval, the Financial Analyst Agent, and the Compliance Auditor Agent. The Auditor either approves the answer (forwarded to the interface), sends it back to the Analyst for revision if retries remain, or routes to a Remediation Safety Node once retries are exhausted, which then also forwards to the interface." width="800">
+</div>
+
+<details>
+<summary>🔤 Text version (for screen readers / rendering fallback)</summary>
 
 ```
                             ┌───────────────────────────────────┐
@@ -89,6 +97,7 @@ FinDocAI is a Retrieval-Augmented Generation (RAG) and multi-agent system for au
          │   FastAPI / Streamlit Interface  │◄────────────────┘
          └──────────────────────────────────┘
 ```
+</details>
 
 ---
 
@@ -263,6 +272,22 @@ python -m src.stage9_eval
 ```
 
 Runs the golden test set through both pipelines and writes detailed metrics to `reports/eval_benchmark_results.json`.
+
+---
+
+## 🖼️ Screenshots
+
+<div align="center">
+
+**Streamlit dashboard**
+
+<img src="assets/screenshot-streamlit.png" alt="FinDocAI Streamlit dashboard showing a submitted query, the verified answer, and the compliance audit metrics panel" width="800">
+
+**FastAPI Swagger docs**
+
+<img src="assets/screenshot-swagger.png" alt="FastAPI auto-generated Swagger UI showing the /health, /documents/ingest, and /query endpoints" width="800">
+
+</div>
 
 ---
 
